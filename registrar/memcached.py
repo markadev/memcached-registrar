@@ -7,6 +7,7 @@ import json
 import logging
 import os
 from pymemcache.client.base import Client
+import signal
 import time
 from urllib.parse import urlparse
 
@@ -105,33 +106,37 @@ def registrar_loop(args):
     })
 
     registry_url = urlparse(args.registry)
-    etclient = etcd.Client(
-        host=registry_url.netloc,
-        port=registry_url.port if registry_url.port is not None else 2379,
-        allow_reconnect=True,
-        protocol='http')
-    etclient._comparison_conditions.add('refresh')
 
     etcd_key = "{}/{}:{}".format(registry_url.path.rstrip('/'),
         args.public_addr, args.public_port)
+    etclient = None
+
     exiting = False
     while not exiting:
         try:
+            if etclient is None:
+                etclient = etcd.Client(
+                    host=registry_url.netloc,
+                    port=registry_url.port \
+                        if registry_url.port is not None else 2379,
+                    allow_reconnect=True,
+                    protocol='http')
+                etclient._comparison_conditions.add('refresh')
+
             # Write the key
             logger.info("Registering service")
             etclient.write(etcd_key, metadata_json, args.ttl)
 
             # Periodically refresh the key
             while True:
-                try:
-                    time.sleep(args.ttl * 3 / 4)
+                time.sleep(args.ttl * 3 / 4)
 
-                    logger.debug("Refreshing service entry")
-                    etclient.write(etcd_key, None, ttl=args.ttl,
-                        prevExist=True, refresh='true')
-                except KeyboardInterrupt:
-                    exiting = True
-                    break
+                logger.debug("Refreshing service entry")
+                etclient.write(etcd_key, None, ttl=args.ttl,
+                    prevExist=True, refresh='true')
+        except KeyboardInterrupt:
+            exiting = True
+            break
         except etcd.EtcdKeyNotFound:
             logger.warn('We were unable to refresh our service before it ' +
                 'expired. Reregistering. Do consider raising the TTL.')
