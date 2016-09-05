@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--public-addr',
         default=os.environ.get('MEMCACHED_PUBLIC_ADDR', None),
         help='External address of memcached, registered with the registry')
-    parser.add_argument('--public-port',
+    parser.add_argument('--public-port', type=int,
         help='External port of memcached, registered with the registry')
     parser.add_argument('--ttl', type=int, default=60,
         help='TTL for etcd entries')
