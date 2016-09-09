@@ -7,7 +7,6 @@ import json
 import logging
 import os
 from pymemcache.client.base import Client
-import signal
 import time
 from urllib.parse import urlparse
 
@@ -117,7 +116,7 @@ def registrar_loop(args):
             if etclient is None:
                 etclient = etcd.Client(
                     host=registry_url.netloc,
-                    port=registry_url.port \
+                    port=registry_url.port
                         if registry_url.port is not None else 2379,
                     allow_reconnect=True,
                     protocol='http')

@@ -3,11 +3,12 @@ from setuptools import find_packages, setup
 
 setup(
     name = 'memcached-registrar',
-    description = 'Sidekick for memcached to register containerized ' +
-                  'instances in a service directory',
+    description = 'Register memcached servers in etcd',
+    long_description = open('README.rst').read(),
     author = 'Mark Aikens',
     author_email = 'markadev@primeletters.net',
     license = 'MIT',
+    url = 'https://github.com/markadev/memcached-registrar',
 
     packages = find_packages(),
     install_requires = [
