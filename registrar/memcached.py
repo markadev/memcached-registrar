@@ -115,7 +115,7 @@ def registrar_loop(args):
         try:
             if etclient is None:
                 etclient = etcd.Client(
-                    host=registry_url.netloc,
+                    host=registry_url.hostname,
                     port=registry_url.port
                         if registry_url.port is not None else 2379,
                     allow_reconnect=True,
